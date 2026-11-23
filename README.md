@@ -5,12 +5,13 @@ restaurant manager on Telegram. It opens the conversation itself in polite Briti
 reacts to whatever the manager says, never invents facts (it asks its human operator instead),
 confirms the booking back in the chat and writes its own decision log.
 
-Bonus: it understands the manager's **voice notes** and answers them with a generated
-British-voice voice note.
+Bonus: it understands the manager's **voice notes** and talks back with generated
+British-voice voice notes.
 
 - Submission notes (tools, AI use, what broke): [NOTES.md](NOTES.md)
+- Full history of what broke during testing and how it was fixed: [docs/NOTES.md](docs/NOTES.md)
 - Decision log of the final conversation: [docs/decision-log.md](docs/decision-log.md)
-- Screenshot of the final conversation: [docs/conversation.png](docs/conversation.png)
+- Screenshots of the final conversation: [docs/screenshots/](docs/screenshots/)
 
 ## How it works
 
@@ -56,10 +57,12 @@ operator, writes a line to the decision log and saves the state file.
    | The final confirmation repeats restaurant, day and date, time, people and name | rendered from state by a template, not by the LLM |
    | The conversation cannot end before that confirmation is sent | `finish` is blocked until then |
    | Only the exact goal (2 people, today, 17:00) is accepted without the operator | prompt + operator question on any change |
-   | The operator is never asked twice for a known fact | repeat question blocked, model re-asked |
-| A question that became irrelevant is closed and the operator is told | late replies to closed questions are rejected |
-| An unconfirmed booking never ends on a plain "thank you" | a reply with no question is sent back to the model to ask for confirmation |
-| The agent never cancels, gives up or ends the chat on its own, and checks claims about the guest with the operator | otherwise the operator is asked, with a fallback question if the model refuses |
+   | The operator is never asked twice for a known fact (name, phone) | repeat question blocked, model re-asked |
+   | Every change of terms (time, date, people) goes to the operator, with their earlier decision quoted | prompt; the question in Saved Messages always quotes the manager's message |
+   | After the operator answers, the manager always gets a reply | a "wait" after a promised reply is sent back to the model |
+   | A question that became irrelevant is closed and the operator is told | late replies to closed questions are rejected |
+   | An unconfirmed booking never ends on a plain "thank you" | a reply with no question is sent back to the model to ask for confirmation |
+   | The agent never cancels, gives up or ends the chat on its own, and checks claims about the guest with the operator | otherwise the operator is asked, with a fallback question if the model refuses |
    | Facts from the operator are not embellished | each value must appear verbatim in the operator's answer |
    | No new conversation too close to the slot | refuses < `START_GUARD_MIN` minutes before 17:00 |
    | No accidental message to the real manager | username must be typed to confirm the first message |
@@ -105,8 +108,11 @@ python -m agent --force              # start even if 17:00 London is too close
 ```
 
 - When the agent needs something it does not know (guest name, phone, a different time), it
-  posts a 🤖 question to the agent account's **Saved Messages**. Reply to it, for example from
-  the phone with the agent account added as a second account.
+  posts a 🤖 question to the agent account's **Saved Messages**, quoting the manager's message.
+  Reply to it, for example from the phone with the agent account added as a second account.
+- You can also step in at any time: a plain message (not a reply) in Saved Messages is taken
+  as an instruction, e.g. "Send one polite reminder" or "We did not cancel, ask them to
+  reinstate the booking".
 - `logs/decisions.md` holds one line per event (in / understood / decided / out) and
   `logs/decisions.jsonl` the full records. Times are in the restaurant's time zone.
   The debug log is `logs/agent.log`.
@@ -157,7 +163,7 @@ src/agent/
   logging_setup.py  console + rotating file debug log
 scripts/            login, check_telegram, list_models, simulate, voice_check
 tests/              unit tests (fake LLM and fake Telegram client)
-docs/               screenshot and decision log of the final conversation
+docs/               final conversation (screenshots/, decision-log.md) and the full NOTES.md
 ```
 
 ## Security
