@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tg-booking-agent"
+version = "0.1.0"
+description = "AI agent that books a restaurant table by chatting with a manager on Telegram (MTProto user account)."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "telethon>=1.40,<2",
+    "pydantic>=2.7,<3",
+    "pydantic-settings>=2.3,<3",
+    "tzdata>=2024.1", # IANA tz database for zoneinfo on Windows
+    "openai>=1.60",
+    "google-genai>=1.0",
+    "groq>=0.11",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+# Voice notes: TTS via edge-tts, local STT via faster-whisper. Also needs ffmpeg on PATH.
+voice = ["edge-tts>=6.1", "faster-whisper>=1.0"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"agent.prompts" = ["*.md"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

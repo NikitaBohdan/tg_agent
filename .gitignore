@@ -1,0 +1,24 @@
+# Secrets & Telegram sessions — never commit
+.env
+*.session
+*.session-journal
+sessions/
+
+# Runtime data (real conversations, operator answers)
+data/
+logs/
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
